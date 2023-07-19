@@ -1,0 +1,14 @@
+{
+  "type": "sqlite",
+  "database": "C:/Users/91735/OneDrive/Desktop/backendAssesment/database.sqlite",
+  "synchronize": true,
+  "logging": true,
+  "entities": ["src/entity/**/*.ts"],
+  "migrations": ["src/migrations/**/*.ts"],
+  "cli": {
+    "entitiesDir": "src/entity",
+    "migrationsDir": "src/migrations"
+  }
+}
+
+

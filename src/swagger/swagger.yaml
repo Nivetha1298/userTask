@@ -1,0 +1,342 @@
+openapi: 3.0.0
+info:
+  title: COLAN TASK
+  version: 1.0.0
+  description: Documentation for the User API
+servers:
+  - url: http://localhost:3000
+    description: Development server
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: Form
+    description: Operations related to forms
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+              required:
+                - username
+                - password
+                - email
+            example: |   
+              {
+                "username": "colanUser",
+                "password": "colan123",
+                "email": "colan@yopmail.com"
+              }
+      responses:
+        "201":
+          description: User registered successfully
+        "400":
+          description: Validation error or user already exists
+        "500":
+          description: Registration failed
+
+  /auth/login:
+    post:
+      summary: User Login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+            example: |   
+              {
+                "username": "colanUser",
+                "password": "colan123"
+              }
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              example: |   
+                {
+                  "token": "your_generated_jwt_token"
+                }
+        "401":
+          description: Invalid credentials
+        "500":
+          description: Login failed due to an internal server error
+
+  /form:
+    post:
+      summary: Submit a new form
+      tags:
+        - Form
+      security:
+        - JWT: []  # Referring to the JWT security scheme defined below
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property1:
+                  type: string
+                  description: Description of property1
+                property2:
+                  type: string
+                  description: Description of property2
+                property3:
+                  type: string
+                  description: Description of property3
+              required:
+                - property1
+                - property2
+            example: |   
+              {
+                 "name": "Nivetha" ,
+                 "email": "nivetha@yopmail.com" ,
+                 "phoneNumber": "9876543210",
+                 "message":"Hello colan"  ,
+                 "photo": "nivetha"
+ 
+              }
+      responses:
+        "201":
+          description: Form submitted successfully
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized - JWT token missing or invalid
+        "500":
+          description: Form submission failed due to an internal server error
+
+    get:
+      summary: Get paginated forms
+      tags:
+        - Form
+      security:
+        - JWT: []  # Referring to the JWT security scheme defined below
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Number of items per page for pagination
+      responses:
+        "200":
+          description: Paginated forms
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Form"
+                  totalItems:
+                    type: integer
+                  currentPage:
+                    type: integer
+                  totalPages:
+                    type: integer
+            example: |   
+              {
+                "data": [
+                  {
+                    "id": 1,
+                    "name": "John Doe",
+                    "email": "john.doe@example.com",
+                    "phoneNumber": "1234567890",
+                    "message": "Hello, World!",
+                    "photo": "https://example.com/photo.jpg"
+                  },
+                  {
+                    "id": 2,
+                    "name": "Jane Smith",
+                    "email": "jane.smith@example.com",
+                    "phoneNumber": "9876543210",
+                    "message": "Hi there!",
+                    "photo": "https://example.com/jane.jpg"
+                  }
+                ],
+                "totalItems": 2,
+                "currentPage": 1,
+                "totalPages": 1
+              }
+
+  /form/{id}:
+    get:
+      summary: Get form by ID
+      tags:
+        - Form
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: ID of the form to retrieve
+      responses:
+        "200":
+          description: Form found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+          example: |   
+            {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john.doe@example.com",
+              "phoneNumber": "1234567890",
+              "message": "Hello, World!",
+              "photo": "https://example.com/photo.jpg"
+            }
+        "404":
+          description: Form not found
+        "500":
+          description: Internal server error
+
+    put:
+      summary: Update form by ID
+      tags:
+        - Form
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: ID of the form to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Form"
+            example: |   
+              {
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "phoneNumber": "1234567890",
+                "message": "Hello, World!",
+                "photo": "https://example.com/photo.jpg"
+              }
+      responses:
+        "200":
+          description: Form updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+          example: |   
+            {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john.doe@example.com",
+              "phoneNumber": "1234567890",
+              "message": "Hello, World!",
+              "photo": "https://example.com/photo.jpg"
+            }
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized - JWT token missing or invalid
+        "404":
+          description: Form not found
+        "500":
+          description: Internal server error
+    delete:
+      summary: Delete form by ID
+      tags:
+        - Form
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: ID of the form to delete
+      responses:
+        "204":
+          description: Form deleted successfully
+        "401":
+          description: Unauthorized - JWT token missing or invalid
+        "404":
+          description: Form not found
+        "500":
+          description: Internal server error
+
+
+
+
+components:
+  schemas:
+    Form:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        message:
+          type: string
+        photo:
+          type: string
+
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
